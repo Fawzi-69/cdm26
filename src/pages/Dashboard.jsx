@@ -9,7 +9,8 @@ export default function Dashboard() {
   const { user } = useAuth()
   const { group } = useGroup()
   const [matches, setMatches] = useState([])
-  const [myBets, setMyBets] = useState({}) // match_id -> bet
+  const [myBets, setMyBets] = useState({}) // match_id -> mon prono
+  const [votesByMatch, setVotesByMatch] = useState({}) // match_id -> [votes des amis]
   const [tournamentStarted, setTournamentStarted] = useState(false)
   const [loading, setLoading] = useState(true)
 
@@ -37,19 +38,43 @@ export default function Dashboard() {
     const list = upcoming ?? []
     setMatches(list)
 
-    // Mes paris pour ces matchs
     if (list.length) {
-      const { data: bets } = await supabase
+      const ids = list.map((m) => m.id)
+
+      // Pseudos des membres du groupe (pour afficher les votes)
+      const { data: members } = await supabase
+        .from('group_members')
+        .select('user_id, username')
+        .eq('group_id', group.id)
+      const nameById = {}
+      for (const m of members ?? []) nameById[m.user_id] = m.username
+
+      // TOUS les pronos du groupe sur ces matchs (visibles entre amis)
+      const { data: allBets } = await supabase
         .from('bets')
         .select('*')
-        .eq('user_id', user.id)
         .eq('group_id', group.id)
-        .in('match_id', list.map((m) => m.id))
-      const map = {}
-      for (const b of bets ?? []) map[b.match_id] = b
-      setMyBets(map)
+        .in('match_id', ids)
+
+      const mine = {}
+      const votes = {}
+      for (const b of allBets ?? []) {
+        if (b.user_id === user.id) mine[b.match_id] = b
+        ;(votes[b.match_id] ||= []).push({
+          ...b,
+          username: nameById[b.user_id] || 'Joueur',
+          isMe: b.user_id === user.id,
+        })
+      }
+      // mes votes en premier, puis par pseudo
+      for (const k of Object.keys(votes)) {
+        votes[k].sort((a, b) => (b.isMe ? 1 : 0) - (a.isMe ? 1 : 0) || a.username.localeCompare(b.username))
+      }
+      setMyBets(mine)
+      setVotesByMatch(votes)
     } else {
       setMyBets({})
+      setVotesByMatch({})
     }
     setLoading(false)
   }, [user, group])
@@ -88,6 +113,7 @@ export default function Dashboard() {
                 key={m.id}
                 match={m}
                 bet={myBets[m.id] || null}
+                votes={votesByMatch[m.id] || []}
                 locked={locked}
                 onBetPlaced={load}
               />

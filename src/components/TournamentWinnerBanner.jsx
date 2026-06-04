@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useGroup } from '../context/GroupContext'
 import { NATIONS, flagUrl } from '../lib/nations'
 
-// Bandeau "Pari vainqueur" : visible tant qu'aucun match n'a commencé.
+// Bandeau "Prono vainqueur" : visible tant qu'aucun match n'a commencé.
 // Immuable une fois soumis.
 export default function TournamentWinnerBanner({ tournamentStarted }) {
   const { user } = useAuth()
@@ -60,22 +60,22 @@ export default function TournamentWinnerBanner({ tournamentStarted }) {
     )
   }
 
-  // Tournoi commencé et pas de pari -> trop tard
+  // Tournoi commencé et pas de prono -> trop tard
   if (tournamentStarted) {
     return (
       <div className="card border-l-4 border-slate-300 p-4 text-sm text-slate-500">
-        🏆 Le pari "vainqueur du tournoi" est fermé (la compétition a commencé).
+        🏆 Le prono "vainqueur du tournoi" est fermé (la compétition a commencé).
       </div>
     )
   }
 
-  // Formulaire de pari
+  // Formulaire de prono
   return (
     <div className="card space-y-3 border-l-4 border-amber-400 p-4">
       <div className="flex items-center gap-2">
         <span className="text-2xl">🏆</span>
         <div>
-          <p className="font-bold">Pari vainqueur du tournoi</p>
+          <p className="font-bold">Prono vainqueur du tournoi</p>
           <p className="text-xs text-slate-500">
             Choisis ton champion avant le 1er match. <b>+10 pts</b> s'il gagne. Immuable.
           </p>

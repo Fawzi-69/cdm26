@@ -22,8 +22,58 @@ function Flag({ code, name }) {
   )
 }
 
-// `match` : ligne matches. `bet` : pari existant (ou null). `locked` : match commencé.
-export default function MatchCard({ match, bet, locked, onBetPlaced }) {
+const labelOf = (p) => (p === 'home' ? '1' : p === 'away' ? '2' : 'N')
+
+// Bloc dépliable : ce qu'ont voté les amis du groupe sur ce match.
+function FriendsVotes({ votes }) {
+  const [open, setOpen] = useState(false)
+  if (!votes?.length) return null
+  return (
+    <div className="mt-3 border-t border-slate-100 pt-2">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between text-xs font-semibold text-slate-500"
+      >
+        <span>👥 Votes des amis ({votes.length})</span>
+        <span className="text-slate-400">{open ? '▲' : '▼'}</span>
+      </button>
+      {open && (
+        <ul className="mt-2 space-y-1">
+          {votes.map((v) => (
+            <li
+              key={v.id}
+              className={`flex items-center justify-between rounded-lg px-2 py-1 text-sm ${
+                v.isMe ? 'bg-brand/5' : ''
+              }`}
+            >
+              <span className="truncate">
+                {v.username} {v.isMe && <span className="text-[11px] text-brand">(toi)</span>}
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-xs font-bold">
+                  {labelOf(v.prediction)}
+                </span>
+                <span className="text-xs text-slate-500">
+                  {v.predicted_home_score}-{v.predicted_away_score}
+                </span>
+                {v.points_earned != null && (
+                  <span className="rounded-md bg-brand/10 px-1.5 py-0.5 text-[11px] font-semibold text-brand">
+                    {Number(v.points_earned)} pt
+                  </span>
+                )}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+// `match` : ligne matches. `bet` : prono existant (ou null). `locked` : match commencé.
+// `votes` : pronos de tous les membres du groupe sur ce match.
+export default function MatchCard({ match, bet, locked, votes = [], onBetPlaced }) {
   const { user } = useAuth()
   const { group } = useGroup()
   const [prediction, setPrediction] = useState(bet?.prediction || '')
@@ -77,7 +127,7 @@ export default function MatchCard({ match, bet, locked, onBetPlaced }) {
     })
     setBusy(false)
     if (error) {
-      setError(error.code === '23505' ? 'Pari déjà enregistré.' : error.message)
+      setError(error.code === '23505' ? 'Prono déjà enregistré.' : error.message)
     } else {
       onBetPlaced?.()
     }
@@ -165,20 +215,22 @@ export default function MatchCard({ match, bet, locked, onBetPlaced }) {
       <div className="mt-3">
         {submitted ? (
           <p className="rounded-xl bg-brand/10 py-2 text-center text-sm font-semibold text-brand">
-            ✓ Pari verrouillé : {bet.prediction === 'home' ? '1' : bet.prediction === 'away' ? '2' : 'N'} ·{' '}
+            ✓ Prono verrouillé : {bet.prediction === 'home' ? '1' : bet.prediction === 'away' ? '2' : 'N'} ·{' '}
             {bet.predicted_home_score}-{bet.predicted_away_score}
             {bet.points_earned != null && ` · ${bet.points_earned} pt(s)`}
           </p>
         ) : locked ? (
-          <p className="py-2 text-center text-sm text-slate-400">Paris fermés</p>
+          <p className="py-2 text-center text-sm text-slate-400">Pronos fermés</p>
         ) : (
           <button className="btn-primary w-full" disabled={busy} onClick={submit}>
-            {busy ? '...' : 'Valider mon pari'}
+            {busy ? '...' : 'Valider mon prono'}
           </button>
         )}
       </div>
 
       {error && <p className="mt-2 text-center text-sm text-red-600">{error}</p>}
+
+      <FriendsVotes votes={votes} />
     </div>
   )
 }

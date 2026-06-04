@@ -54,13 +54,13 @@ export default function MyBets() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold">Mes paris</h2>
+        <h2 className="text-lg font-bold">Mes pronos</h2>
         <span className="text-sm text-slate-500">
           Total gagné : <b className="text-brand">{totalEarned} pts</b>
         </span>
       </div>
 
-      {/* Pari vainqueur */}
+      {/* Prono vainqueur */}
       {winnerBet && (
         <div className="card flex items-center gap-3 border-l-4 border-amber-400 p-4">
           <span className="text-2xl">🏆</span>
@@ -89,7 +89,7 @@ export default function MyBets() {
       ) : bets.length === 0 ? (
         <div className="card p-8 text-center text-slate-500">
           <p className="text-3xl">🎯</p>
-          <p className="mt-2">Tu n'as pas encore parié. Direction les matchs !</p>
+          <p className="mt-2">Tu n'as pas encore pronostiqué. Direction les matchs !</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -108,7 +108,7 @@ export default function MyBets() {
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-slate-500">
-                    Pari : <b>{labelOf(b.prediction)}</b> · {b.predicted_home_score}-{b.predicted_away_score}
+                    Prono : <b>{labelOf(b.prediction)}</b> · {b.predicted_home_score}-{b.predicted_away_score}
                   </p>
                   <Outcome bet={b} match={m} />
                 </div>

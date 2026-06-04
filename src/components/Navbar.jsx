@@ -5,7 +5,7 @@ import { useGroup } from '../context/GroupContext'
 const links = [
   { to: '/dashboard', label: 'Matchs', icon: '⚽' },
   { to: '/leaderboard', label: 'Classement', icon: '🏆' },
-  { to: '/my-bets', label: 'Mes paris', icon: '🎯' },
+  { to: '/my-bets', label: 'Mes pronos', icon: '🎯' },
 ]
 
 export default function Navbar() {
