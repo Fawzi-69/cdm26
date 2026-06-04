@@ -6,6 +6,8 @@ import Join from './pages/Join'
 import Dashboard from './pages/Dashboard'
 import Leaderboard from './pages/Leaderboard'
 import MyBets from './pages/MyBets'
+import ResetPassword from './pages/ResetPassword'
+import { useAuth } from './context/AuthContext'
 
 function Shell({ children, requireGroup = true }) {
   return (
@@ -19,6 +21,11 @@ function Shell({ children, requireGroup = true }) {
 }
 
 export default function App() {
+  const { recovery } = useAuth()
+
+  // Priorité au flux "mot de passe oublié" (lien email), quelle que soit la route
+  if (recovery) return <ResetPassword />
+
   return (
     <Routes>
       <Route path="/auth" element={<Auth />} />

@@ -6,6 +6,7 @@ const AuthContext = createContext(null)
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [recovery, setRecovery] = useState(false) // flux "mot de passe oublié"
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -13,8 +14,9 @@ export function AuthProvider({ children }) {
       setLoading(false)
     })
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s)
+      if (event === 'PASSWORD_RECOVERY') setRecovery(true)
     })
     return () => sub.subscription.unsubscribe()
   }, [])
@@ -23,6 +25,8 @@ export function AuthProvider({ children }) {
     session,
     user: session?.user ?? null,
     loading,
+    recovery,
+    endRecovery: () => setRecovery(false),
     signOut: () => supabase.auth.signOut(),
   }
 

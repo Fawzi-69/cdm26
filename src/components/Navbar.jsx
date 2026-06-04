@@ -23,7 +23,7 @@ export default function Navbar() {
   return (
     <>
       {/* Header */}
-      <header className="sticky top-0 z-20 border-b border-slate-200 bg-brand text-white">
+      <header className="sticky top-0 z-20 border-b border-white/20 bg-fiesta text-white">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
             <span className="text-xl">⚽</span>

@@ -24,17 +24,21 @@ export default function Auth() {
     setInfo('')
     setBusy(true)
     try {
-      if (mode === 'signup') {
+      if (mode === 'forgot') {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin,
+        })
+        if (error) throw error
+        setInfo('Si un compte existe, un email de réinitialisation vient de partir. Vérifie ta boîte mail.')
+      } else if (mode === 'signup') {
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: { data: { username } },
         })
         if (error) throw error
-        setInfo(
-          'Compte créé. Si la confirmation email est activée, vérifie ta boîte mail puis connecte-toi.',
-        )
-        setMode('signin')
+        // Confirmation email désactivée -> session immédiate, on enchaîne
+        navigate('/join')
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
@@ -48,31 +52,37 @@ export default function Auth() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-brand px-4">
-      <div className="mb-6 text-center text-white">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-fiesta px-4">
+      <div className="mb-6 text-center text-white drop-shadow">
         <div className="text-5xl">⚽</div>
         <h1 className="mt-2 text-3xl font-extrabold tracking-tight">CDM26</h1>
-        <p className="text-white/80">Pronostics entre amis · Coupe du Monde 2026</p>
+        <p className="text-white/90">Pronostics entre amis · Coupe du Monde 2026</p>
       </div>
 
       <form onSubmit={handleSubmit} className="card w-full max-w-sm space-y-4 p-6">
-        <div className="flex rounded-xl bg-slate-100 p-1">
-          {['signin', 'signup'].map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => {
-                setMode(m)
-                setError('')
-              }}
-              className={`flex-1 rounded-lg py-2 text-sm font-semibold transition ${
-                mode === m ? 'bg-white text-brand shadow' : 'text-slate-500'
-              }`}
-            >
-              {m === 'signin' ? 'Connexion' : 'Inscription'}
-            </button>
-          ))}
-        </div>
+        {mode !== 'forgot' && (
+          <div className="flex rounded-xl bg-slate-100 p-1">
+            {['signin', 'signup'].map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => {
+                  setMode(m)
+                  setError('')
+                }}
+                className={`flex-1 rounded-lg py-2 text-sm font-semibold transition ${
+                  mode === m ? 'bg-white text-brand shadow' : 'text-slate-500'
+                }`}
+              >
+                {m === 'signin' ? 'Connexion' : 'Inscription'}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {mode === 'forgot' && (
+          <p className="text-sm font-semibold text-brand">Réinitialiser le mot de passe</p>
+        )}
 
         {mode === 'signup' && (
           <div>
@@ -100,25 +110,61 @@ export default function Auth() {
           />
         </div>
 
-        <div>
-          <label className="mb-1 block text-sm font-medium">Mot de passe</label>
-          <input
-            type="password"
-            className="input"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            required
-            minLength={6}
-          />
-        </div>
+        {mode !== 'forgot' && (
+          <div>
+            <label className="mb-1 block text-sm font-medium">Mot de passe</label>
+            <input
+              type="password"
+              className="input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+              minLength={6}
+            />
+          </div>
+        )}
 
         {error && <p className="text-sm text-red-600">{error}</p>}
         {info && <p className="text-sm text-brand">{info}</p>}
 
         <button type="submit" className="btn-primary w-full" disabled={busy}>
-          {busy ? '...' : mode === 'signin' ? 'Se connecter' : "S'inscrire"}
+          {busy
+            ? '...'
+            : mode === 'forgot'
+              ? 'Envoyer le lien'
+              : mode === 'signin'
+                ? 'Se connecter'
+                : "S'inscrire"}
         </button>
+
+        {mode === 'signin' && (
+          <button
+            type="button"
+            onClick={() => {
+              setMode('forgot')
+              setError('')
+              setInfo('')
+            }}
+            className="w-full text-center text-sm text-slate-500 hover:text-brand"
+          >
+            Mot de passe oublié ?
+          </button>
+        )}
+
+        {mode === 'forgot' && (
+          <button
+            type="button"
+            onClick={() => {
+              setMode('signin')
+              setError('')
+              setInfo('')
+            }}
+            className="w-full text-center text-sm text-slate-500 hover:text-brand"
+          >
+            ← Retour à la connexion
+          </button>
+        )}
       </form>
     </div>
   )
