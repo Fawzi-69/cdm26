@@ -16,7 +16,7 @@ export default function Navbar() {
   if (!user) return null
 
   const linkClass = ({ isActive }) =>
-    `flex flex-col items-center gap-0.5 px-3 py-2 text-xs font-medium sm:flex-row sm:gap-1.5 sm:text-sm ${
+    `flex h-full flex-col items-center justify-center gap-0.5 px-3 text-[11px] font-medium sm:flex-row sm:gap-1.5 sm:text-sm ${
       isActive ? 'text-brand' : 'text-slate-500 hover:text-brand'
     }`
 
@@ -57,10 +57,15 @@ export default function Navbar() {
 
       {/* Bottom nav (mobile-first) */}
       <nav className="fixed bottom-0 left-0 z-20 w-full border-t border-slate-200 bg-white sm:static sm:border-0 sm:bg-transparent">
-        <div className="mx-auto flex max-w-3xl items-center justify-around sm:justify-center sm:gap-6 sm:py-2">
+        <div
+          className="mx-auto flex max-w-3xl items-stretch justify-around sm:justify-center sm:gap-6"
+          style={{ height: '56px' }}
+        >
           {links.map((l) => (
             <NavLink key={l.to} to={l.to} className={linkClass}>
-              <span className="text-base">{l.icon}</span>
+              <span style={{ fontSize: '20px' }} className="leading-none">
+                {l.icon}
+              </span>
               {l.label}
             </NavLink>
           ))}

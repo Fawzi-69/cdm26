@@ -9,6 +9,7 @@ export default function Dashboard() {
   const { user } = useAuth()
   const { group } = useGroup()
   const [matches, setMatches] = useState([])
+  const [finished, setFinished] = useState([])
   const [myBets, setMyBets] = useState({}) // match_id -> mon prono
   const [votesByMatch, setVotesByMatch] = useState({}) // match_id -> [votes des amis]
   const [tournamentStarted, setTournamentStarted] = useState(false)
@@ -27,7 +28,7 @@ export default function Dashboard() {
       .lte('match_date', nowIso)
     setTournamentStarted((startedCount ?? 0) > 0)
 
-    // 6 prochains matchs à venir (à défaut, on prend les plus proches)
+    // 6 prochains matchs à venir
     const { data: upcoming } = await supabase
       .from('matches')
       .select('*')
@@ -35,11 +36,22 @@ export default function Dashboard() {
       .order('match_date', { ascending: true })
       .limit(6)
 
-    const list = upcoming ?? []
-    setMatches(list)
+    // Matchs récemment terminés (résultats + animations)
+    const { data: done } = await supabase
+      .from('matches')
+      .select('*')
+      .eq('status', 'finished')
+      .order('match_date', { ascending: false })
+      .limit(4)
 
-    if (list.length) {
-      const ids = list.map((m) => m.id)
+    const list = upcoming ?? []
+    const doneList = done ?? []
+    setMatches(list)
+    setFinished(doneList)
+
+    const allMatches = [...list, ...doneList]
+    if (allMatches.length) {
+      const ids = allMatches.map((m) => m.id)
 
       // Pseudos des membres du groupe (pour afficher les votes)
       const { data: members } = await supabase
@@ -105,7 +117,7 @@ export default function Dashboard() {
           </p>
         </div>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-2.5 sm:grid-cols-2">
           {matches.map((m) => {
             const locked = new Date(m.match_date) <= new Date() || m.status !== 'scheduled'
             return (
@@ -119,6 +131,24 @@ export default function Dashboard() {
               />
             )
           })}
+        </div>
+      )}
+
+      {!loading && finished.length > 0 && (
+        <div className="space-y-2.5">
+          <h2 className="text-lg font-bold">Résultats récents</h2>
+          <div className="grid gap-2.5 sm:grid-cols-2">
+            {finished.map((m) => (
+              <MatchCard
+                key={m.id}
+                match={m}
+                bet={myBets[m.id] || null}
+                votes={votesByMatch[m.id] || []}
+                locked
+                onBetPlaced={load}
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>

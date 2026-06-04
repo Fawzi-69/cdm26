@@ -2,7 +2,7 @@
 // Edge Function: sync-matches
 // Récupère les matchs + cotes de la Coupe du Monde 2026 depuis
 // API-Football (via RapidAPI), upsert dans `matches`, puis calcule les
-// points des paris terminés. À planifier toutes les 12 h (cron).
+// points des pronos terminés. À planifier toutes les 12 h (cron).
 // =====================================================================
 //
 // Secrets requis (supabase secrets set ...):
@@ -153,8 +153,8 @@ Deno.serve(async () => {
   }
 })
 
-// Calcule points_earned des paris des matchs terminés, puis met à jour
-// total_points des membres concernés. Renvoie le nb de paris notés.
+// Calcule points_earned des pronos des matchs terminés, puis met à jour
+// total_points des membres concernés. Renvoie le nb de pronos notés.
 async function scoreFinishedMatches(supabase: any): Promise<number> {
   const { data: finished } = await supabase
     .from('matches')
@@ -236,7 +236,7 @@ async function recomputeMemberTotal(supabase: any, group_id: string, user_id: st
     .eq('user_id', user_id)
 }
 
-// Si la finale est terminée, attribue +10 aux paris vainqueur corrects.
+// Si la finale est terminée, attribue +10 aux pronos vainqueur corrects.
 async function applyTournamentWinnerBonus(supabase: any): Promise<number> {
   const { data: finalMatch } = await supabase
     .from('matches')
@@ -256,7 +256,7 @@ async function applyTournamentWinnerBonus(supabase: any): Promise<number> {
       ? finalMatch.home_team
       : finalMatch.away_team
 
-  // Paris vainqueur non encore notés
+  // Pronos vainqueur non encore notés
   const { data: wbets } = await supabase
     .from('tournament_winner_bets')
     .select('id, user_id, group_id, team')

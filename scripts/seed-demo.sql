@@ -1,5 +1,5 @@
 -- Matchs de démo CDM26 (api_match_id 99000x réservés à la démo).
--- Dates calées dans le futur via now()+interval pour garder les paris ouverts.
+-- Dates calées dans le futur via now()+interval pour garder les pronos ouverts.
 -- Réexécutable : ON CONFLICT met à jour.
 INSERT INTO matches
   (api_match_id, home_team, away_team, home_flag, away_flag, match_date, stage, status, home_odds, draw_odds, away_odds)

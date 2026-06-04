@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS matches (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- Paris sur les matchs : résultat 1/N/2 + score exact prédit
+-- Pronos sur les matchs : résultat 1/N/2 + score exact prédit
 CREATE TABLE IF NOT EXISTS bets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id),
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS bets (
   UNIQUE(user_id, group_id, match_id)
 );
 
--- Pari vainqueur du tournoi (avant le 1er match) : +10 pts si correct
+-- Prono vainqueur du tournoi (avant le 1er match) : +10 pts si correct
 CREATE TABLE IF NOT EXISTS tournament_winner_bets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id),

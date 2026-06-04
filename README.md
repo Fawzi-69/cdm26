@@ -1,11 +1,11 @@
 # CDM26 ⚽ — Pronostics Coupe du Monde 2026
 
-Application de pronostics entre amis : crée un groupe, pronostique le **résultat (1/N/2)** et le **score exact** de chaque match, parie sur le **vainqueur du tournoi**, et grimpe au **classement temps réel**.
+Application de pronostics entre amis : crée un groupe, pronostique le **résultat (1/N/2)** et le **score exact** de chaque match, choisis le **vainqueur du tournoi**, et grimpe au **classement temps réel**.
 
 - **Stack** : React + Vite + Tailwind · Supabase (auth, DB, Realtime) · API-Football (RapidAPI) · GitHub Pages.
 
 ## Barème
-| Pari | Points |
+| Prono | Points |
 |------|--------|
 | Bon résultat 1/N/2 | **1 pt** |
 | Score exact | **3 pts** (remplace le point de résultat) |
@@ -95,5 +95,5 @@ supabase/
 
 ## Notes
 - Routing en **HashRouter** (`/#/...`) pour compatibilité GitHub Pages.
-- Un pari est **immuable** : verrouillé côté UI + contrainte `UNIQUE(user_id, group_id, match_id)` en DB.
+- Un prono est **immuable** : verrouillé côté UI + contrainte `UNIQUE(user_id, group_id, match_id)` en DB.
 - Confirmation email : selon les réglages Auth de ton projet Supabase (désactive-la pour des tests rapides).
