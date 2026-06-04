@@ -1,8 +1,8 @@
 name: Deploy to GitHub Pages
 
+# Déploiement désormais via `npm run deploy` (branche gh-pages) + domaine cdm26.is-a.dev.
+# Workflow conservé en déclenchement manuel uniquement pour éviter tout conflit.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:

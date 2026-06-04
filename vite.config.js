@@ -1,8 +1,8 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// base must match the GitHub Pages repo name for correct asset paths
+// Domaine personnalisé cdm26.is-a.dev -> servi à la racine, donc base '/'
 export default defineConfig({
   plugins: [react()],
-  base: '/cdm26/',
+  base: '/',
 })
