@@ -158,6 +158,7 @@ Deno.serve(async () => {
     }
 
     const scored = await scoreFinishedMatches(supabase)
+    const championBonus = await applyTournamentWinnerBonus(supabase)
 
     return Response.json({
       ok: true,
@@ -165,6 +166,7 @@ Deno.serve(async () => {
       odds: oddsEvents.length,
       scores: scoreEvents.length,
       bets_scored: scored,
+      champion_bonus: championBonus,
     })
   } catch (e) {
     console.error(e)
@@ -249,4 +251,44 @@ async function recomputeMemberTotal(supabase: any, group_id: string, user_id: st
     .update({ total_points: total })
     .eq('group_id', group_id)
     .eq('user_id', user_id)
+}
+
+// Bonus vainqueur du tournoi. The Odds API ne fournit pas le "stage", donc on
+// considère que la FINALE est le dernier match du tournoi (date la plus tardive).
+// Quand elle est terminée avec un vainqueur, on crédite +10 aux pronos sur le champion.
+async function applyTournamentWinnerBonus(supabase: any): Promise<number> {
+  const { data: finale } = await supabase
+    .from('matches')
+    .select('home_team, away_team, home_score, away_score, status')
+    .order('match_date', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (!finale || finale.status !== 'finished') return 0
+  if (finale.home_score === null || finale.away_score === null) return 0
+  if (finale.home_score === finale.away_score) return 0 // vainqueur indéterminable (tirs au but)
+
+  const champion =
+    finale.home_score > finale.away_score ? finale.home_team : finale.away_team
+
+  const { data: wbets } = await supabase
+    .from('tournament_winner_bets')
+    .select('id, user_id, group_id, team')
+    .is('points_earned', null)
+
+  if (!wbets?.length) return 0
+
+  let awarded = 0
+  const dirty = new Set<string>()
+  for (const w of wbets) {
+    const pts = w.team === champion ? 10 : 0
+    await supabase.from('tournament_winner_bets').update({ points_earned: pts }).eq('id', w.id)
+    if (pts > 0) awarded++
+    dirty.add(`${w.group_id}:${w.user_id}`)
+  }
+  for (const key of dirty) {
+    const [g, u] = key.split(':')
+    await recomputeMemberTotal(supabase, g, u)
+  }
+  return awarded
 }

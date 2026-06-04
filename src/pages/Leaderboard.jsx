@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useGroup } from '../context/GroupContext'
+import InviteButton from '../components/InviteButton'
 
 const MEDALS = ['🥇', '🥈', '🥉']
 
@@ -52,6 +53,10 @@ export default function Leaderboard() {
           <span className="h-2 w-2 animate-pulse rounded-full bg-brand" /> live
         </span>
       </div>
+
+      {group?.code && (
+        <InviteButton code={group.code} className="w-full !py-2 text-sm" />
+      )}
 
       {loading ? (
         <div className="py-10 text-center text-slate-400">Chargement…</div>

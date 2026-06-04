@@ -1,18 +1,23 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useGroup } from '../context/GroupContext'
+import InviteButton from '../components/InviteButton'
 
 export default function Join() {
   const { user } = useAuth()
   const { group, refreshGroup } = useGroup()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+
+  // Code pré-rempli via lien d'invitation (/join?code=XXXXXX)
+  const invitedCode = (searchParams.get('code') || '').toUpperCase()
 
   const defaultUsername = user?.user_metadata?.username || ''
   const [tab, setTab] = useState('join') // 'join' | 'create'
   const [username, setUsername] = useState(defaultUsername)
-  const [code, setCode] = useState('')
+  const [code, setCode] = useState(invitedCode)
   const [groupName, setGroupName] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -80,6 +85,7 @@ export default function Join() {
           <div className="rounded-xl bg-brand/10 py-4 text-4xl font-extrabold tracking-[0.3em] text-brand">
             {createdCode}
           </div>
+          <InviteButton code={createdCode} className="w-full" />
           <button onClick={() => navigate('/dashboard')} className="btn-primary w-full">
             Commencer à pronostiquer
           </button>
