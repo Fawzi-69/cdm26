@@ -9,34 +9,37 @@ export function GroupProvider({ children }) {
   const { user } = useAuth()
   const [group, setGroup] = useState(null)
   const [membership, setMembership] = useState(null) // ma ligne group_members
+  const [memberships, setMemberships] = useState([]) // tous mes groupes (pour le switch)
   const [loading, setLoading] = useState(true)
 
   async function loadGroups(preferredId) {
     if (!user) {
       setGroup(null)
       setMembership(null)
+      setMemberships([])
       setLoading(false)
       return
     }
     setLoading(true)
     // Tous mes memberships + le groupe associé
-    const { data: memberships } = await supabase
+    const { data: rows } = await supabase
       .from('group_members')
       .select('*, groups(*)')
       .eq('user_id', user.id)
       .order('created_at', { ascending: true })
 
-    if (!memberships?.length) {
+    if (!rows?.length) {
       setGroup(null)
       setMembership(null)
+      setMemberships([])
       setLoading(false)
       return
     }
 
     const stored = preferredId || localStorage.getItem(STORAGE_KEY)
-    const chosen =
-      memberships.find((m) => m.group_id === stored) || memberships[0]
+    const chosen = rows.find((m) => m.group_id === stored) || rows[0]
 
+    setMemberships(rows)
     setMembership(chosen)
     setGroup(chosen.groups)
     localStorage.setItem(STORAGE_KEY, chosen.group_id)
@@ -51,6 +54,7 @@ export function GroupProvider({ children }) {
   const value = {
     group,
     membership,
+    memberships,
     loading,
     refreshGroup: loadGroups,
     selectGroup: (id) => loadGroups(id),

@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useGroup } from '../context/GroupContext'
+import GroupSwitcher from './GroupSwitcher'
 
 const links = [
   { to: '/dashboard', label: 'Matchs', icon: '⚽' },
@@ -42,6 +43,7 @@ export default function Navbar() {
                 {membership.username} · <b>{Number(membership.total_points || 0)} pts</b>
               </span>
             )}
+            <GroupSwitcher />
             <button
               onClick={async () => {
                 await signOut()
