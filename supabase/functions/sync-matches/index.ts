@@ -52,8 +52,12 @@ interface OddsEvent {
   commence_time: string
   home_team: string
   away_team: string
-  bookmakers?: Array<{ markets?: Array<{ key: string; outcomes: Array<{ name: string; price: number }> }> }>
+  bookmakers?: Array<{ key?: string; markets?: Array<{ key: string; outcomes: Array<{ name: string; price: number }> }> }>
 }
+
+// Bookmaker à épingler en priorité (sinon premier dispo).
+// Clé The Odds API pour Betclic France = 'betclic_fr'.
+const PREFERRED_BOOKMAKER = 'betclic_fr'
 interface ScoreEvent {
   id: string
   commence_time: string
@@ -64,7 +68,8 @@ interface ScoreEvent {
 }
 
 function parseOdds(e: OddsEvent) {
-  const market = e.bookmakers?.[0]?.markets?.find((m) => m.key === 'h2h')
+  const bk = e.bookmakers?.find((b) => b.key === PREFERRED_BOOKMAKER) ?? e.bookmakers?.[0]
+  const market = bk?.markets?.find((m) => m.key === 'h2h')
   let home: number | null = null, draw: number | null = null, away: number | null = null
   for (const o of market?.outcomes ?? []) {
     if (o.name === e.home_team) home = o.price
