@@ -1,21 +1,20 @@
 import { useState } from 'react'
 
-const APP_URL = 'https://cdm26-rose.vercel.app'
-
 // Bouton d'invitation : Web Share natif sur mobile, sinon copie dans le presse-papier.
 export default function InviteButton({ code, className = '' }) {
   const [copied, setCopied] = useState(false)
 
-  const link = `${APP_URL}/join?code=${code}`
+  // L'URL ne doit apparaître qu'UNE seule fois dans le message.
   const message =
-    `⚽ Rejoins mon groupe de pronos pour la Coupe du Monde 2026 sur CDM26 !\n` +
-    `Code du groupe : ${code}\n` +
-    `👉 ${link}`
+    `⚽ Rejoins mon groupe de pronos CDM26 !\n` +
+    `Code : ${code}\n` +
+    `👉 cdm26-rose.vercel.app/join?code=${code}`
 
   async function share() {
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'CDM26 — Pronostics', text: message, url: link })
+        // pas de champ `url` séparé -> évite le doublon d'URL (déjà dans le texte)
+        await navigator.share({ text: message })
       } catch {
         /* partage annulé */
       }
