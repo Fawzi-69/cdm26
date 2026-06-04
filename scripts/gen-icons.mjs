@@ -1,57 +1,52 @@
-// Génère public/icon-192.png et public/icon-512.png : ballon de foot vert CDM26.
-import { Resvg } from '@resvg/resvg-js'
-import { writeFileSync, mkdirSync } from 'node:fs'
+// Génère public/icon-192.png et public/icon-512.png :
+// trophée Coupe du Monde FIFA doré sur fond vert foncé (#1a6b3c) + "CDM26".
+import sharp from 'sharp'
+import { mkdirSync } from 'node:fs'
 
 mkdirSync('public', { recursive: true })
 
-const S = 512
-const cx = 256, cy = 222, R = 132
-const GREEN = '#15803d', DARK = '#0f5c2e', BLACK = '#101418', WHITE = '#ffffff'
+const GREEN = '#1a6b3c'
 
-function pentagon(ox, oy, r, rotDeg = -90) {
-  const pts = []
-  for (let i = 0; i < 5; i++) {
-    const a = ((rotDeg + i * 72) * Math.PI) / 180
-    pts.push([ox + r * Math.cos(a), oy + r * Math.sin(a)])
-  }
-  return pts
-}
-const toPath = (pts) => 'M' + pts.map((p) => `${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' L') + ' Z'
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFEFAE"/>
+      <stop offset="0.45" stop-color="#F4C842"/>
+      <stop offset="1" stop-color="#C28A14"/>
+    </linearGradient>
+  </defs>
 
-const center = pentagon(cx, cy, 46)
+  <rect width="512" height="512" rx="96" fill="${GREEN}"/>
 
-let seams = ''
-for (const [x, y] of center) {
-  const dx = x - cx, dy = y - cy
-  const len = Math.hypot(dx, dy)
-  const ex = cx + (dx / len) * R, ey = cy + (dy / len) * R
-  seams += `<line x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="${DARK}" stroke-width="6"/>`
-}
+  <g fill="url(#gold)">
+    <!-- globe -->
+    <circle cx="256" cy="138" r="48"/>
+    <!-- corps torsadé (les deux silhouettes qui soutiennent le globe) -->
+    <path d="M256 182 C224 193 211 232 229 276 C240 303 238 315 256 326
+             C274 315 272 303 283 276 C301 232 288 193 256 182 Z"/>
+    <!-- évasement vers la base -->
+    <path d="M256 322 C236 331 223 346 219 368 L293 368 C289 346 276 331 256 322 Z"/>
+    <!-- socle -->
+    <rect x="206" y="362" width="100" height="26" rx="10"/>
+    <rect x="220" y="388" width="72" height="16" rx="7"/>
+  </g>
 
-let outer = ''
-for (let i = 0; i < 5; i++) {
-  const ang = -90 + 36 + i * 72
-  const a = (ang * Math.PI) / 180
-  const ox = cx + Math.cos(a) * 104, oy = cy + Math.sin(a) * 104
-  outer += `<path d="${toPath(pentagon(ox, oy, 26, ang + 180))}" fill="${BLACK}"/>`
-}
+  <!-- méridiens du globe (or foncé) -->
+  <g fill="none" stroke="#A9790F" stroke-width="2.5">
+    <ellipse cx="256" cy="138" rx="20" ry="48"/>
+    <ellipse cx="256" cy="138" rx="48" ry="19"/>
+  </g>
 
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">
-  <rect width="${S}" height="${S}" rx="96" fill="${GREEN}"/>
-  <circle cx="${cx}" cy="${cy}" r="${R}" fill="${WHITE}" stroke="${DARK}" stroke-width="6"/>
-  ${seams}
-  ${outer}
-  <path d="${toPath(center)}" fill="${BLACK}"/>
-  <text x="${cx}" y="440" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="66" font-weight="800" fill="${WHITE}">CDM26</text>
+  <text x="256" y="466" text-anchor="middle"
+        font-family="Arial, Helvetica, sans-serif" font-size="66" font-weight="800"
+        fill="#ffffff">CDM26</text>
 </svg>`
 
 for (const size of [192, 512]) {
-  const png = new Resvg(svg, { fitTo: { mode: 'width', value: size } }).render().asPng()
-  writeFileSync(`public/icon-${size}.png`, png)
-  console.log(`écrit public/icon-${size}.png (${png.length} octets)`)
+  await sharp(Buffer.from(svg)).resize(size, size).png().toFile(`public/icon-${size}.png`)
+  console.log(`écrit public/icon-${size}.png`)
 }
 
-// favicon (PNG 48px nommé .ico — accepté par les navigateurs modernes)
-const fav = new Resvg(svg, { fitTo: { mode: 'width', value: 48 } }).render().asPng()
-writeFileSync('public/favicon.ico', fav)
-console.log(`écrit public/favicon.ico (${fav.length} octets)`)
+// favicon (48px) cohérent
+await sharp(Buffer.from(svg)).resize(48, 48).png().toFile('public/favicon.ico')
+console.log('écrit public/favicon.ico')
