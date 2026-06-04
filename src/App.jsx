@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard'
 import Leaderboard from './pages/Leaderboard'
 import MyBets from './pages/MyBets'
 import ResetPassword from './pages/ResetPassword'
+import InstallPrompt from './components/InstallPrompt'
 import { useAuth } from './context/AuthContext'
 
 function Shell({ children, requireGroup = true }) {
@@ -27,6 +28,7 @@ export default function App() {
   if (recovery) return <ResetPassword />
 
   return (
+    <>
     <Routes>
       <Route path="/auth" element={<Auth />} />
       <Route
@@ -63,5 +65,7 @@ export default function App() {
       />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
+    <InstallPrompt />
+    </>
   )
 }

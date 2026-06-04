@@ -1,57 +1,47 @@
-// Déploie l'Edge Function sync-matches + pose le secret API_FOOTBALL_KEY
-// via l'API Management Supabase.
-// Usage: SUPABASE_TOKEN=... API_FOOTBALL_KEY=... node scripts/deploy-function.mjs
+// Déploie une Edge Function via l'API Management Supabase, et pose
+// éventuellement le secret ODDS_API_KEY.
+// Usage:
+//   SUPABASE_TOKEN=... [ODDS_API_KEY=...] node scripts/deploy-function.mjs <slug> [slug2 ...]
 import { readFileSync } from 'node:fs'
 
 const token = process.env.SUPABASE_TOKEN
 const ref = process.env.SUPABASE_REF || 'opilqjghbbmcdubgdwjs'
-const apiKey = process.env.API_FOOTBALL_KEY
-const SLUG = 'sync-matches'
+const oddsKey = process.env.ODDS_API_KEY
+const slugs = process.argv.slice(2)
 
 if (!token) throw new Error('SUPABASE_TOKEN manquant')
+if (!slugs.length) throw new Error('Indique au moins un slug de fonction')
 
-const H = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
 const base = `https://api.supabase.com/v1/projects/${ref}`
 
-async function j(label, res) {
+async function logRes(label, res) {
   const t = await res.text()
   console.log(`\n== ${label} -> HTTP ${res.status}`)
-  console.log(t.slice(0, 1500))
-  return { ok: res.ok, status: res.status, text: t }
+  console.log(t.slice(0, 1200))
+  return res.ok
 }
 
-// 1) Secret
-if (apiKey) {
+// Secret ODDS_API_KEY (optionnel)
+if (oddsKey) {
   const r = await fetch(`${base}/secrets`, {
     method: 'POST',
-    headers: H,
-    body: JSON.stringify([{ name: 'API_FOOTBALL_KEY', value: apiKey }]),
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify([{ name: 'ODDS_API_KEY', value: oddsKey }]),
   })
-  await j('secret API_FOOTBALL_KEY', r)
+  await logRes('secret ODDS_API_KEY', r)
 }
 
-// 2) Déploiement (multipart deploy endpoint)
-const source = readFileSync('supabase/functions/sync-matches/index.ts', 'utf8')
+// Déploiement de chaque fonction
+for (const slug of slugs) {
+  const source = readFileSync(`supabase/functions/${slug}/index.ts`, 'utf8')
+  const form = new FormData()
+  form.append('metadata', JSON.stringify({ name: slug, entrypoint_path: 'index.ts', verify_jwt: false }))
+  form.append('file', new Blob([source], { type: 'application/typescript' }), 'index.ts')
 
-const metadata = {
-  name: SLUG,
-  entrypoint_path: 'index.ts',
-  verify_jwt: false,
+  const res = await fetch(`${base}/functions/deploy?slug=${slug}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+  })
+  await logRes(`deploy ${slug}`, res)
 }
-
-const form = new FormData()
-form.append('metadata', JSON.stringify(metadata))
-form.append(
-  'file',
-  new Blob([source], { type: 'application/typescript' }),
-  'index.ts',
-)
-
-const deployRes = await fetch(`${base}/functions/deploy?slug=${SLUG}`, {
-  method: 'POST',
-  headers: { Authorization: `Bearer ${token}` }, // pas de Content-Type: laissé à FormData
-  body: form,
-})
-const dep = await j('deploy sync-matches', deployRes)
-
-process.exit(dep.ok ? 0 : 1)

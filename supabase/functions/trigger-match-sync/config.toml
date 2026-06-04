@@ -1,0 +1,2 @@
+[functions.trigger-match-sync]
+schedule = "*/5 * * * *"

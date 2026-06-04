@@ -2,7 +2,7 @@
 
 Application de pronostics entre amis : crée un groupe, pronostique le **résultat (1/N/2)** et le **score exact** de chaque match, choisis le **vainqueur du tournoi**, et grimpe au **classement temps réel**.
 
-- **Stack** : React + Vite + Tailwind · Supabase (auth, DB, Realtime) · API-Football (RapidAPI) · Vercel.
+- **Stack** : React + Vite + Tailwind (PWA) · Supabase (auth, DB, Realtime) · The Odds API · Vercel.
 
 ## Barème
 | Prono | Points |
@@ -29,40 +29,29 @@ Dans le **SQL Editor** du projet Supabase, exécute le contenu de
 
 > Pense à **activer Realtime** sur le projet (la migration ajoute déjà `group_members`, `matches`, `bets` à la publication `supabase_realtime`).
 
-## 3. Edge Function `sync-matches`
-Récupère matchs + cotes de l'API-Football et calcule les points (toutes les 12 h).
+## 3. Edge Functions (The Odds API)
+- **`sync-matches`** : récupère matchs, cotes (h2h) et résultats depuis [The Odds API](https://the-odds-api.com), upsert dans `matches`, calcule les points. Cron toutes les 12 h (`config.toml`).
+- **`trigger-match-sync`** : cron toutes les 5 min qui ne consomme **aucune** requête API ; il appelle `sync-matches` uniquement quand un match programmé vient de se terminer (heure de fin prévue dépassée). Max 3 déclenchements/appel.
 
 ```bash
 # Authentifie le CLI puis lie le projet
 supabase login
 supabase link --project-ref opilqjghbbmcdubgdwjs
 
-# Secret RapidAPI (NE PAS committer la clé)
-supabase secrets set API_FOOTBALL_KEY=ta_cle_rapidapi
+# Secret The Odds API (NE PAS committer la clé)
+supabase secrets set ODDS_API_KEY=ta_cle_the_odds_api
 
-# Déploiement
+# Déploiement (lit les schedules dans config.toml)
 supabase functions deploy sync-matches
+supabase functions deploy trigger-match-sync
 ```
 
-### Planification toutes les 12 h
-Dans Supabase → **Database → Cron Jobs** (extension `pg_cron`), ou via SQL :
-```sql
-select cron.schedule(
-  'sync-matches-12h',
-  '0 */12 * * *',
-  $$ select net.http_post(
-       url := 'https://opilqjghbbmcdubgdwjs.functions.supabase.co/sync-matches',
-       headers := '{"Authorization":"Bearer <SERVICE_ROLE_KEY>"}'::jsonb
-     ); $$
-);
-```
 Test manuel :
 ```bash
-curl -X POST https://opilqjghbbmcdubgdwjs.functions.supabase.co/sync-matches \
-  -H "Authorization: Bearer <ANON_OR_SERVICE_KEY>"
+curl -X POST https://opilqjghbbmcdubgdwjs.functions.supabase.co/sync-matches
 ```
 
-> ℹ️ La compétition est ciblée via `LEAGUE_ID=1` / `SEASON=2026` dans `supabase/functions/sync-matches/index.ts`. Ajuste si l'ID de la Coupe du Monde 2026 diffère sur ton abonnement RapidAPI.
+> ℹ️ La compétition ciblée est `soccer_fifa_world_cup` dans `supabase/functions/sync-matches/index.ts`.
 
 ## 4. Déploiement Vercel
 1. Va sur **https://vercel.com/new** et importe le repo GitHub **`Fawzi-69/cdm26`**.
