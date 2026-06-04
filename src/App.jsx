@@ -8,6 +8,7 @@ import Leaderboard from './pages/Leaderboard'
 import MyBets from './pages/MyBets'
 import ResetPassword from './pages/ResetPassword'
 import InstallPrompt from './components/InstallPrompt'
+import WelcomeModal from './components/WelcomeModal'
 import { useAuth } from './context/AuthContext'
 
 function Shell({ children, requireGroup = true }) {
@@ -65,6 +66,7 @@ export default function App() {
       />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
+    <WelcomeModal />
     <InstallPrompt />
     </>
   )
