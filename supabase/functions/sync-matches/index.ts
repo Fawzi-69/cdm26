@@ -23,20 +23,20 @@ const API_BASE = 'https://api.the-odds-api.com/v4'
 
 // Nom de pays (anglais, fourni par The Odds API) -> code flagcdn (best effort).
 function flagCodeFromCountry(name: string): string | null {
+  // Couvre les 48 nations renvoyées par The Odds API pour la CdM 2026.
   const map: Record<string, string> = {
-    Argentina: 'ar', France: 'fr', Brazil: 'br', England: 'gb-eng',
-    Spain: 'es', Germany: 'de', Portugal: 'pt', Netherlands: 'nl',
-    Belgium: 'be', Croatia: 'hr', Italy: 'it', Uruguay: 'uy',
-    Morocco: 'ma', USA: 'us', 'United States': 'us', Mexico: 'mx',
-    Canada: 'ca', Japan: 'jp', 'South Korea': 'kr', Senegal: 'sn',
-    Switzerland: 'ch', Denmark: 'dk', Poland: 'pl', Serbia: 'rs',
-    Ghana: 'gh', Cameroon: 'cm', Ecuador: 'ec', Qatar: 'qa',
-    'Saudi Arabia': 'sa', Australia: 'au', Tunisia: 'tn', Iran: 'ir',
-    Colombia: 'co', Nigeria: 'ng', Egypt: 'eg', Algeria: 'dz',
-    'Ivory Coast': 'ci', Ukraine: 'ua', Austria: 'at', Wales: 'gb-wls',
-    Scotland: 'gb-sct', Norway: 'no', Sweden: 'se', Turkey: 'tr',
-    Peru: 'pe', Chile: 'cl', Paraguay: 'py', 'Costa Rica': 'cr',
-    Panama: 'pa', Jamaica: 'jm', 'New Zealand': 'nz',
+    Algeria: 'dz', Argentina: 'ar', Australia: 'au', Austria: 'at',
+    Belgium: 'be', 'Bosnia & Herzegovina': 'ba', Brazil: 'br', Canada: 'ca',
+    'Cape Verde': 'cv', Colombia: 'co', Croatia: 'hr', 'Curaçao': 'cw',
+    'Czech Republic': 'cz', 'DR Congo': 'cd', Ecuador: 'ec', Egypt: 'eg',
+    England: 'gb-eng', France: 'fr', Germany: 'de', Ghana: 'gh',
+    Haiti: 'ht', Iran: 'ir', Iraq: 'iq', 'Ivory Coast': 'ci',
+    Japan: 'jp', Jordan: 'jo', Mexico: 'mx', Morocco: 'ma',
+    Netherlands: 'nl', 'New Zealand': 'nz', Norway: 'no', Panama: 'pa',
+    Paraguay: 'py', Portugal: 'pt', Qatar: 'qa', 'Saudi Arabia': 'sa',
+    Scotland: 'gb-sct', Senegal: 'sn', 'South Africa': 'za', 'South Korea': 'kr',
+    Spain: 'es', Sweden: 'se', Switzerland: 'ch', Tunisia: 'tn',
+    Turkey: 'tr', Uruguay: 'uy', USA: 'us', Uzbekistan: 'uz',
   }
   return map[name] ?? null
 }
