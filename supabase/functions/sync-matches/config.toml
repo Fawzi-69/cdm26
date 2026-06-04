@@ -1,0 +1,2 @@
+[functions.sync-matches]
+schedule = "0 */12 * * *"

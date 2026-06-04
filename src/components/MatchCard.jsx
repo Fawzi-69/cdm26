@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useGroup } from '../context/GroupContext'
 import { flagUrl } from '../lib/nations'
+import { formatMatchDate } from '../lib/dates'
 
 const RESULTS = [
   { key: 'home', label: '1' },
@@ -112,10 +113,7 @@ export default function MatchCard({ match, bet, locked, votes = [], onBetPlaced 
   const disabled = submitted || locked
 
   const odds = { home: match.home_odds, draw: match.draw_odds, away: match.away_odds }
-  const time = new Date(match.match_date).toLocaleTimeString('fr-FR', {
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  const time = formatMatchDate(match.match_date)
 
   const realResult = isFinished
     ? match.home_score > match.away_score
