@@ -22,16 +22,22 @@ const existing = (cur.uri_allow_list || '')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean)
-const wanted = ['http://localhost:5173/**', 'http://localhost:4173/**']
+const SITE = process.env.SITE_URL || 'https://cdm26-rose.vercel.app'
+const wanted = [
+  'http://localhost:5173/**',
+  'http://localhost:4173/**',
+  `${SITE}/**`,
+]
 const merged = Array.from(new Set([...existing, ...wanted])).join(',')
 
-// 3) Patch
+// 3) Patch (autoconfirm + allow-list + site_url de prod)
 const res = await fetch(base, {
   method: 'PATCH',
   headers: H,
   body: JSON.stringify({
     mailer_autoconfirm: true,
     uri_allow_list: merged,
+    site_url: SITE,
   }),
 })
 const out = await res.json()

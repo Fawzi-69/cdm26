@@ -87,6 +87,6 @@ supabase/
 ```
 
 ## Notes
-- Routing en **HashRouter** (`/#/...`). Sur Vercel le fallback SPA est aussi géré par `vercel.json`, donc un passage à `BrowserRouter` (URLs sans `#`) est possible si souhaité.
+- Routing en **BrowserRouter** (URLs propres `/dashboard`). Le fallback SPA est assuré par `vercel.json` (rewrites vers `/index.html`).
 - Un prono est **immuable** : verrouillé côté UI + contrainte `UNIQUE(user_id, group_id, match_id)` en DB.
 - Confirmation email : selon les réglages Auth de ton projet Supabase (désactive-la pour des tests rapides).

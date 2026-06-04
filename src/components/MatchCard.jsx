@@ -146,7 +146,7 @@ export default function MatchCard({ match, bet, locked, votes = [], onBetPlaced 
       : { x: 0.5, y: 0.4 }
 
     const end = Date.now() + 2000
-    const colors = ['#7c3aed', '#db2777', '#f59e0b', '#22c55e', '#ffffff']
+    const colors = ['#15803d', '#22c55e', '#fbbf24', '#ffffff']
     const interval = setInterval(() => {
       if (!window.confetti || Date.now() > end) {
         clearInterval(interval)
