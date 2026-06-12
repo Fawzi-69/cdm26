@@ -4,9 +4,9 @@ import { useAuth } from '../context/AuthContext'
 import { useGroup } from '../context/GroupContext'
 import { NATIONS, flagUrl } from '../lib/nations'
 
-// Bandeau "Prono vainqueur" : visible tant qu'aucun match n'a commencé.
+// Bandeau "Prono vainqueur" : ouvert jusqu'au début de la phase à élimination directe.
 // Immuable une fois soumis.
-export default function TournamentWinnerBanner({ tournamentStarted }) {
+export default function TournamentWinnerBanner({ knockoutStarted }) {
   const { user } = useAuth()
   const { group } = useGroup()
   const [existing, setExisting] = useState(null)
@@ -59,11 +59,11 @@ export default function TournamentWinnerBanner({ tournamentStarted }) {
     )
   }
 
-  // Tournoi commencé et pas de prono -> trop tard
-  if (tournamentStarted) {
+  // Phase à élimination directe commencée et pas de prono -> trop tard
+  if (knockoutStarted) {
     return (
       <div className="card border-l-4 border-slate-300 p-2.5 text-sm text-slate-500">
-        🏆 Prono vainqueur fermé (la compétition a commencé).
+        🏆 Prono vainqueur fermé (la phase à élimination directe a commencé).
       </div>
     )
   }
@@ -78,7 +78,7 @@ export default function TournamentWinnerBanner({ tournamentStarted }) {
         <div className="leading-tight">
           <p className="text-sm font-bold">Prono vainqueur du tournoi</p>
           <p className="text-[11px] text-slate-500">
-            Avant le 1er match · <b>+10 pts</b> s'il gagne · immuable
+            Jusqu'aux 16es de finale (28 juin) · <b>+10 pts</b> s'il gagne · immuable
           </p>
         </div>
       </div>

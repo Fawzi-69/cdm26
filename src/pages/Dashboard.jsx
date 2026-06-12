@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useGroup } from '../context/GroupContext'
 import MatchCard from '../components/MatchCard'
 import TournamentWinnerBanner from '../components/TournamentWinnerBanner'
+import { KNOCKOUT_START } from '../lib/dates'
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -12,7 +13,6 @@ export default function Dashboard() {
   const [finished, setFinished] = useState([])
   const [myBets, setMyBets] = useState({}) // match_id -> mon prono
   const [votesByMatch, setVotesByMatch] = useState({}) // match_id -> [votes des amis]
-  const [tournamentStarted, setTournamentStarted] = useState(false)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
 
@@ -23,14 +23,6 @@ export default function Dashboard() {
 
     try {
       const nowIso = new Date().toISOString()
-
-      // Le tournoi a-t-il commencé ? (un match passé ou en cours existe)
-      const { count: startedCount, error: e0 } = await supabase
-        .from('matches')
-        .select('id', { count: 'exact', head: true })
-        .lte('match_date', nowIso)
-      if (e0) throw e0
-      setTournamentStarted((startedCount ?? 0) > 0)
 
       // 6 prochains matchs à venir
       const { data: upcoming, error: e1 } = await supabase
@@ -110,7 +102,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-4">
-      <TournamentWinnerBanner tournamentStarted={tournamentStarted} />
+      <TournamentWinnerBanner knockoutStarted={new Date() >= KNOCKOUT_START} />
 
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold">Prochains matchs</h2>
